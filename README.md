@@ -52,45 +52,51 @@ Build ParkMan from the source and install dependencies:
 
 2. Navigate to the project directory:
    ```bash
-   cd parkman
+   cd parkman/frontend
+   ```
+   ```bash
+   cd parkman/backend
    ```
 
 3. Install the dependencies:
 
-   Using npm:
+   Frontend (Using npm):
    ```bash
    npm install
    ```
 
-   Using pip:
+   Backend (Using pip):
    ```bash
-   pip install -r backend/requirements.txt
+   pip install -r requirements.txt
    ```
 
 ### Usage
 
 Run the project with:
 
-Using npm:
+Frontend (Using npm):
 ```bash
-npm start
+npm run dev
+```
+```bash
+npm run preview
 ```
 
-Using pip:
+Backend (Using pip):
 ```bash
-python app.py
+honcho start
 ```
 
 ### Testing
 
 ParkMan uses the pytest test framework. Run the test suite with:
 
-Using npm:
+Frontend (Using npm):
 ```bash
 npm test
 ```
 
-Using pip:
+Backend (Using pip):
 ```bash
 pytest
 ```
