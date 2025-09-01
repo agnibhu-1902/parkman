@@ -1,0 +1,1949 @@
+openapi: 3.0.0
+info:
+  title: ParkMan API
+  description: A REST API for booking and managing parking lots
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:5000
+  # description: Local Development Server
+
+paths:
+  /api/register:
+    post:
+      summary: Register user
+      description: Allows users to register to this application.
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - name
+                - password
+                - phone
+              properties:
+                email:
+                  type: string
+                name:
+                  type: string
+                password:
+                  type: string
+                address:
+                  type: string
+                pincode:
+                  type: string
+                phone:
+                  type: string
+            example:
+              email: johndoe@example.com
+              name: John Doe
+              password: 1234@5678
+              address: 12, Cherry Tree Lane
+              pincode: 700104
+              phone: 9876543210
+      responses:
+        "201":
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+              example:
+                success: true
+                message: User registered successfully
+        "400":
+          description: Registration failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+              example:
+                success: false
+                message: Email and/or password required
+        "409":
+          description: Registration failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+              example:
+                success: false
+                message: User already exists
+        "500":
+          description: Registration failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  error:
+                    type: string
+              example:
+                success: false
+                message: Failed to register user
+                error: Database failed to load
+  /api/login:
+    post:
+      summary: Login user
+      description: Allows users to login to this application.
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+            example:
+              email: johndoe@example.com
+              password: 1234@5678
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  user:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                      name:
+                        type: string
+              example:
+                success: true
+                user:
+                  email: johndoe@example.com
+                  name: John Doe
+        "401":
+          description: Login failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+              example:
+                success: false
+                message: Invalid password
+        "500":
+          description: Login failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  error:
+                    type: string
+              example:
+                success: false
+                message: Failed to login user
+                error: Database failed to load
+  /api/logout:
+    post:
+      summary: Logout user
+      description: Allows users to logout from this application.
+      tags:
+        - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+              example:
+                success: true
+                message: Logged out successfully
+        "500":
+          description: Logout failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  error:
+                    type: string
+              example:
+                success: false
+                message: Failed to logout user
+                error: Cannot find method
+  /api/check-auth:
+    get:
+      summary: Check authentication
+      description: Allows users to check if they are logged in to the application.
+      tags:
+        - Authentication
+      responses:
+        "200":
+          description: User authenticated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  logged_in:
+                    type: boolean
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      email:
+                        type: string
+                      name:
+                        type: string
+                      address:
+                        type: string
+                      pincode:
+                        type: string
+                      is_admin:
+                        type: boolean
+              example:
+                logged_in: true
+                user:
+                  id: 1
+                  email: johndoe@example.com
+                  name: John Doe
+                  address: 12, Cherry Tree Lane
+                  pincode: "700104"
+                  is_admin: true
+        "401":
+          description: User not authenticated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  logged_in:
+                    type: boolean
+                example:
+                  logged_in: false
+  /api/parking-lots/:
+    get:
+      summary: Get parking lots
+      description: Allows users to fetch all parking lots from the database.
+      tags:
+        - Parking Lots
+      responses:
+        "200":
+          description: Successfully fetched parking lots
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  lots:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        prime_location_name:
+                          type: string
+                        address:
+                          type: string
+                        pincode:
+                          type: string
+                        number_of_spots:
+                          type: string
+              example:
+                success: true
+                lots:
+                  - id: 1
+                    prime_location_name: "Central Mall"
+                    address: "123 Main Street"
+                    pincode: "560001"
+                    price: 50.00
+                    number_of_spots: 120
+                  - id: 2
+                    prime_location_name: "Tech Park"
+                    address: "456 Silicon Avenue"
+                    pincode: "560102"
+                    price: 40.00
+                    number_of_spots: 90
+
+        "404":
+          description: Failed to fetch parking lots
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+              example:
+                success: false
+                message: No parking lots found
+        "500":
+          description: Failed to fetch parking lots
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  error:
+                    type: string
+              example:
+                success: false
+                message: Failed to fetch parking lots
+                error: Cannot connect to database
+    post:
+      summary: Add a new parking lot
+      description: Allows an authenticated user to create a new parking lot and its corresponding spots.
+      tags:
+        - Parking Lots
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - primeLocationName
+                - address
+                - pincode
+                - price
+                - maxSpots
+              properties:
+                primeLocationName:
+                  type: string
+                  example: "Downtown Center"
+                address:
+                  type: string
+                  example: "456 Main Street"
+                pincode:
+                  type: string
+                  example: "560001"
+                price:
+                  type: number
+                  format: float
+                  example: 50.00
+                maxSpots:
+                  type: integer
+                  example: 100
+      responses:
+        "201":
+          description: Parking lot added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Parking lot added successfully
+        "400":
+          description:  User is not an admin
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Only admins can add parking lots
+        "500":
+          description: Server error while adding parking lot
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Failed to add parking lot
+                  error:
+                    type: string
+                    example: UNIQUE constraint failed
+  /api/parking-lots/{id}:
+    put:
+      summary: Edit a parking lot
+      description: Allows an authenticated user to update the details and size of a specific parking lot.
+      tags:
+        - Parking Lots
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the parking lot to update
+          schema:
+            type: integer
+            example: 3
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                primeLocationName:
+                  type: string
+                  example: "City Center Garage"
+                address:
+                  type: string
+                  example: "123 Main St"
+                pincode:
+                  type: string
+                  example: "700001"
+                price:
+                  type: number
+                  format: float
+                  example: 40.00
+                maxSpots:
+                  type: integer
+                  example: 50
+      responses:
+        "200":
+          description: Parking lot edited successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Parking lot edited successfully
+        "400":
+          description: Cannot remove occupied parking spots
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Cannot remove occupied parking spots
+        "404":
+          description: Parking lot ID not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Parking lot ID not found
+        "500":
+          description: Server error while editing parking lot
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Failed to edit parking lot
+                  error:
+                    type: string
+                    example: Some error details
+    delete:
+      summary: Delete a parking lot
+      description: Deletes a parking lot if none of its spots are currently occupied.
+      tags:
+        - Parking Lots
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the parking lot to delete
+          schema:
+            type: integer
+            example: 12
+      responses:
+        "200":
+          description: Parking lot successfully deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Parking lot deleted successfully
+        "400":
+          description: Cannot delete lot due to occupied spots
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Cannot delete lot as some spots are currently occupied
+        "404":
+          description: Parking lot not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Parking lot ID not found
+        "500":
+          description: Server error while deleting parking lot
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Failed to delete parking lot
+                  error:
+                    type: string
+                    example: SQLAlchemy error message
+  /api/parking-lots/{lot_id}/spots:
+    get:
+      summary: Get spots for a specific parking lot
+      description: Returns a list of parking spots for the given parking lot ID.
+      tags:
+        - Parking Lots
+      parameters:
+        - name: lot_id
+          in: path
+          required: true
+          description: ID of the parking lot
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of parking spots fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  spots:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 12
+                        lot_id:
+                          type: integer
+                          example: 5
+                        status:
+                          type: string
+                          example: available
+        "404":
+          description: Parking lot not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Parking lot not found
+        "500":
+          description: Internal server error while fetching parking spots
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Failed to fetch parking spots
+                  error:
+                    type: string
+                    example: Database connection error
+  /api/parking-lots/{lot_id}/available-spot:
+    get:
+      summary: Get first available parking spot
+      description: Returns the ID of the first available parking spot in the given parking lot.
+      tags:
+        - Parking Lots
+      parameters:
+        - name: lot_id
+          in: path
+          required: true
+          description: ID of the parking lot to search in
+          schema:
+            type: integer
+            example: 5
+      responses:
+        '200':
+          description: Successfully found an available parking spot
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  spot_id:
+                    type: integer
+                    example: 12
+        '404':
+          description: No available parking spot found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: No available parking spot
+        '500':
+          description: Server error when fetching parking spot
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Failed to fetch parking spot
+                  error:
+                    type: string
+                    example: Database connection error
+  /api/parking-lots/search:
+    get:
+      summary: Search parking lots by location or pincode
+      description: Returns a list of parking lots that match the provided location or pincode.
+      tags:
+        - Parking Lots
+      parameters:
+        - name: location
+          in: query
+          required: false
+          description: Search term for the prime location name (partial match supported)
+          schema:
+            type: string
+            example: MG Road
+        - name: pincode
+          in: query
+          required: false
+          description: Search term for the pincode (partial match supported)
+          schema:
+            type: string
+            example: "560001"
+      responses:
+        "200":
+          description: Matching parking lots fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  lots:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        prime_location_name:
+                          type: string
+                          example: MG Road
+                        address:
+                          type: string
+                          example: 123 MG Road, Bangalore
+                        pincode:
+                          type: string
+                          example: "560001"
+                        price:
+                          type: number
+                          format: float
+                          example: 50.00
+                        number_of_spots:
+                          type: integer
+                          example: 25
+        "500":
+          description: Internal server error while fetching parking lots
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Failed to fetch parking lots
+                  error:
+                    type: string
+                    example: Database connection error
+  /api/parking-lots/admin/search:
+    get:
+      summary: Admin search parking lots by name or pincode
+      description: Allows administrators to search for parking lots using either the name or pincode.
+      tags:
+        - Parking Lots
+      parameters:
+        - name: parkingLotPincode
+          in: query
+          required: false
+          description: Pincode of the parking lot to search for (partial match supported)
+          schema:
+            type: string
+            example: "560001"
+        - name: parkingLotName
+          in: query
+          required: false
+          description: Name of the parking lot to search for (partial match supported)
+          schema:
+            type: string
+            example: Koramangala
+      responses:
+        "200":
+          description: Matching parking lots fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  lots:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        prime_location_name:
+                          type: string
+                          example: Koramangala
+                        address:
+                          type: string
+                          example: 45, 5th Cross Rd, Bangalore
+                        pincode:
+                          type: string
+                          example: "560034"
+                        price:
+                          type: number
+                          format: float
+                          example: 40.00
+                        number_of_spots:
+                          type: integer
+                          example: 30
+        "404":
+          description: Neither pincode nor name was provided
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Parking lot ID or name not found
+        "400":
+          description: User is not an admin
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Only admins can search this lot
+        "500":
+          description: Internal server error while fetching parking lots
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Failed to fetch parking lots
+                  error:
+                    type: string
+                    example: Database connection error
+  /api/parking-lots/summary:
+    get:
+      summary: Get user-specific parking lot summary
+      description: |
+        Returns a summary of all completed reservations for the currently logged-in user, grouped by parking lot location.  
+        Shows total visits and total amount spent per location.
+      tags:
+        - Parking Lots
+      responses:
+        "200":
+          description: Summary fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  lots:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        location:
+                          type: string
+                          example: Koramangala
+                        total_visits:
+                          type: integer
+                          example: 5
+                        total_spent:
+                          type: number
+                          format: float
+                          example: 250.50
+        "404":
+          description: No data found for user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: No parking lots found
+        "500":
+          description: Internal server error during summary fetch
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Failed to fetch parking lots data
+                  error:
+                    type: string
+                    example: Database error details
+  /api/parking-lots/admin/summary:
+    get:
+      summary: Get admin-specific parking lot summary
+      description: |
+        Returns a summary for all parking lots, including revenue, number of occupied, unavailable, and available spots.
+        Requires admin authentication.
+      tags:
+        - Parking Lots
+      responses:
+        "200":
+          description: Summary fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  lots:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          example: MG Road
+                        revenue:
+                          type: number
+                          format: float
+                          example: 10250.75
+                        occupied:
+                          type: integer
+                          example: 12
+                        unavailable:
+                          type: integer
+                          example: 3
+                        available:
+                          type: integer
+                          example: 5
+        "404":
+          description: No parking lots found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: No parking lots found
+        "400":
+          description: User is not an admin
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Only admins can view this summary
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Failed to fetch parking lots data
+                  error:
+                    type: string
+                    example: Database error details
+  /api/parking-spots/{spot_id}:
+    delete:
+      summary: Delete a parking spot
+      description: |
+        Deletes a parking spot if it exists and is not currently occupied.
+        Also removes any associated reservation and updates the parking lot's spot count.
+        Requires user to be logged in.
+      tags:
+        - Parking Spots
+      parameters:
+        - name: spot_id
+          in: path
+          required: true
+          description: ID of the parking spot to delete
+          schema:
+            type: integer
+            example: 42
+      responses:
+        "200":
+          description: Parking spot deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Successfully deleted parking spot
+        "400":
+          description: Cannot delete an occupied parking spot
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Cannot delete an occupied parking spot
+        "404":
+          description: Parking spot not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Parking spot ID not found
+        "500":
+          description: Server error during deletion
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Failed to delete parking spot
+                  error:
+                    type: string
+                    example: SQLAlchemy flush error
+    patch:
+      summary: Toggle availability of a parking spot
+      description: |
+        Marks a parking spot as unavailable or available, depending on its current status. 
+        Occupied spots cannot be marked. Requires login.
+      tags:
+        - Parking Spots
+      parameters:
+        - name: spot_id
+          in: path
+          required: true
+          description: ID of the parking spot to mark
+          schema:
+            type: integer
+            example: 17
+      responses:
+        "200":
+          description: Spot marked successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Parking spot successfully marked
+        "400":
+          description: Spot is currently occupied
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Cannot mark an occupied parking spot
+        "404":
+          description: Spot not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Parking spot ID not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Failed to fetch parking spot
+                  error:
+                    type: string
+                    example: SQLAlchemy error
+  /api/reservations:
+    post:
+      summary: Book a parking spot
+      description: |
+        Creates a new reservation for a parking spot. Ensures that the same vehicle is not already actively reserved. Requires authentication.
+      tags:
+        - Reservations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - spotID
+                - lotID
+                - userID
+                - vehicleNo
+              properties:
+                spotID:
+                  type: integer
+                  example: 45
+                lotID:
+                  type: integer
+                  example: 12
+                userID:
+                  type: integer
+                  example: 7
+                vehicleNo:
+                  type: string
+                  example: "MH12AB1234"
+      responses:
+        "201":
+          description: Parking spot booked successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Parking spot booked successfully
+        "400":
+          description: Duplicate active reservation for vehicle
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Cannot book another spot with the same vehicle
+        "500":
+          description: Server-side error while booking
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Unexpected error while booking parking spot
+                  error:
+                    type: string
+                    example: SQLAlchemy error message
+    get:
+      tags:
+        - Reservations
+      summary: Get user reservations
+      description: Retrieve all parking reservations made by the currently logged-in user, ordered by most recent.
+      responses:
+        '200':
+          description: List of reservations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  reservations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        spot_id:
+                          type: integer
+                          example: 101
+                        user_id:
+                          type: integer
+                          example: 42
+                        parking_timestamp:
+                          type: string
+                          example: "Tuesday, 16 July 2024 at 3:30 PM"
+                        leaving_timestamp:
+                          type: string
+                          example: "Tuesday, 16 July 2024 at 6:30 PM"
+                        parking_cost:
+                          type: number
+                          format: float
+                          example: 150.0
+                        status:
+                          type: string
+                          example: "completed"
+                        vehicle_number:
+                          type: string
+                          example: "WB12AB1234"
+                        location:
+                          type: string
+                          example: "Park Street"
+                        address:
+                          type: string
+                          example: "12 Park Street, Kolkata 700016"
+        '404':
+          description: No reservations found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: No booked parking spots found
+        '500':
+          description: Unexpected error while fetching reservations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Failed to fetch reservations
+                  error:
+                    type: string
+                    example: Database connection error
+    patch:
+      tags:
+        - Reservations
+      summary: Complete a reservation
+      description: Marks a reservation as completed, sets the leaving timestamp to the current time, and updates the parking spot status.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id
+              properties:
+                id:
+                  type: integer
+                  example: 1
+      responses:
+        '200':
+          description: Reservation updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Reservation updated successfully
+        '404':
+          description: Reservation ID not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Reservation ID not found
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Unexpected error while updating reservation
+                  error:
+                    type: string
+                    example: SQLAlchemy error message
+  /api/reservations/{spot_id}/active:
+    get:
+      tags:
+        - Reservations
+      summary: Get active reservation for a parking spot
+      description: Returns the active reservation (if any) for a given parking spot.
+      parameters:
+        - name: spot_id
+          in: path
+          required: true
+          description: ID of the parking spot
+          schema:
+            type: integer
+            example: 7
+      responses:
+        '200':
+          description: Active reservation found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  reservation:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 42
+                      spot_id:
+                        type: integer
+                        example: 7
+                      user_id:
+                        type: integer
+                        example: 3
+                      parking_timestamp:
+                        type: string
+                        example: "Monday, 15 July 2025 at 4:30 PM"
+                      leaving_timestamp:
+                        type: string
+                        nullable: true
+                        example: null
+                      parking_cost:
+                        type: number
+                        format: float
+                        example: 50.0
+                      status:
+                        type: string
+                        example: active
+                      vehicle_number:
+                        type: string
+                        example: "WB26AB1234"
+                      location:
+                        type: string
+                        example: "South City Mall"
+                      address:
+                        type: string
+                        example: "375 Prince Anwar Shah Rd, Kolkata"
+        '404':
+          description: No active reservation found for the spot
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Reservation not found
+        '500':
+          description: Unexpected error while fetching active reservation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Failed to fetch active reservation
+                  error:
+                    type: string
+                    example: Database connection error
+  /api/users:
+    get:
+      tags:
+        - Users
+      summary: Get all users
+      description: Returns a list of all registered users. Admin access required.
+      responses:
+        '200':
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  users:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        email:
+                          type: string
+                          example: user@example.com
+                        name:
+                          type: string
+                          example: Ananya Roy
+                        address:
+                          type: string
+                          example: 123 MG Road, Bengaluru
+                        pincode:
+                          type: string
+                          example: "560001"
+                        is_admin:
+                          type: boolean
+                          example: false
+        '404':
+          description: No users found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: No user details found
+        '400':
+          description: User is not an admin
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Only admins can fetch all users
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Failed to fetch Users
+                  error:
+                    type: string
+                    example: Database connection error
+  /api/users/{id}:
+    patch:
+      tags:
+        - Users
+      summary: Edit a user's details
+      description: Updates the information of a specific user. Admin access required.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID of the user to update
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Agnibhu Mandal"
+                address:
+                  type: string
+                  example: "123 MG Road, Kolkata"
+                pincode:
+                  type: string
+                  example: "700001"
+                isAdmin:
+                  type: boolean
+                  example: false
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User data edited successfully
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: User ID not found
+        '400':
+          description: User is not an admin
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Only admins can edit user details
+        '500':
+          description: Failed to update user data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Failed to edit user data
+                  error:
+                    type: string
+                    example: SQLAlchemy Error
+    put:
+      tags:
+        - Users
+      summary: Edit user profile
+      description: Updates a user's profile information including optional password update.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID of the user to update
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - address
+                - pincode
+              properties:
+                name:
+                  type: string
+                  example: "Agnibhu Mandal"
+                email:
+                  type: string
+                  format: email
+                  example: "agnibhu@example.com"
+                address:
+                  type: string
+                  example: "123 MG Road, Kolkata"
+                pincode:
+                  type: string
+                  example: "700001"
+                password:
+                  type: string
+                  format: password
+                  example: "new_password123"
+                confirmPassword:
+                  type: string
+                  format: password
+                  example: "new_password123"
+      responses:
+        '200':
+          description: User profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User profile edited successfully
+        '400':
+          description: Password mismatch
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Passwords don't match
+        '404':
+          description: User ID not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: User ID not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Failed to edit user profile
+                  error:
+                    type: string
+                    example: SQLAlchemy Exception
+    delete:
+      tags:
+        - Users
+      summary: Delete a user
+      description: Deletes a user if they exist, are not an admin, and do not have active reservations.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID of the user to delete
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User deleted successfully
+        '400':
+          description: Cannot delete admin or user with active reservations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Cannot delete user who has booked reservations
+        '404':
+          description: User ID not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: User ID not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Failed to delete user
+                  error:
+                    type: string
+                    example: SQLAlchemy Exception
+  /api/users/admin/search:
+    get:
+      tags:
+        - Users
+      summary: Admin search for users
+      description: Allows administrators to search users by name or email.
+      parameters:
+        - in: query
+          name: userFullName
+          required: false
+          schema:
+            type: string
+          description: Full name of the user (partial match supported)
+        - in: query
+          name: userEmail
+          required: false
+          schema:
+            type: string
+          description: Email address of the user (partial match supported)
+      responses:
+        '200':
+          description: Successfully found users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  users:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 7
+                        email:
+                          type: string
+                          example: johndoe@example.com
+                        name:
+                          type: string
+                          example: John Doe
+                        address:
+                          type: string
+                          example: 123 MG Road, Bengaluru
+                        pincode:
+                          type: string
+                          example: "560001"
+                        is_admin:
+                          type: boolean
+                          example: false
+        '404':
+          description: No users found or no query parameters provided
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: User ID or name not found
+        "400":
+          description: User is not an admin
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Only admins can search this user
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Failed to fetch users
+                  error:
+                    type: string
+                    example: Database connection error
+  /api/exports/csv:
+    post:
+      tags:
+        - Exports
+      summary: Trigger CSV export of parking history
+      description: Starts a background task to export the parking reservation history of the logged-in user as a CSV file. An email will be sent once the export is ready.
+      responses:
+        '201':
+          description: Export job successfully started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Export job started! You'll receive an email when it's ready.
+        '500':
+          description: Server error while starting export job
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Failed to start export job
+                  error:
+                    type: string
+                    example: Some internal error message

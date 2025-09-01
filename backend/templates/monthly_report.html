@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Monthly Activity Report</title>
+  </head>
+  <body>
+    <h1>Monthly Activity Report - {{ month_name }}</h1>
+    <br />
+    <p><strong>Total Spots Booked:</strong> {{ bookings_count }}</p>
+    <p><strong>Most Used Lot:</strong> {{ most_used_lot }}</p>
+    {% if reservations is not defined %}
+    <p><strong>Total Spent:</strong> ₹{{ total_spent }}</p>
+    {% else %}
+    <p><strong>Total Spent:</strong> &#x60;{{ total_spent }}</p>
+    {% endif %}
+    <br />
+    {% if reservations is not defined or not reservations %}
+    <p>Thank you for using our service!</p>
+    <p>ParkMan - The Parking Management System</p>
+    {% else %}
+    <h2>Reservations This Month for {{ user.name }}</h2>
+    <br />
+    <table border="1" width="100%" cellspacing="0" cellpadding="6">
+      <thead>
+        <tr bgcolor="#CEE8F0" color="#ffffff" align="center">
+          <th width="33%">Date</th>
+          <th width="34%">Lot</th>
+          <th width="33%">Cost</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for reservation in reservations %}
+        <tr align="center">
+          <td>{{ reservation.parking_timestamp.strftime('%d %b %Y') }}</td>
+          <td>{{ reservation.spot.parking_lot.prime_location_name }}</td>
+          <td>&#x60;{{ reservation.parking_cost }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+  </body>
+</html>

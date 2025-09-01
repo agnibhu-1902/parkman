@@ -1,0 +1,13 @@
+flask==3.1.0
+flask-login==0.6.3
+flask-cors==6.0.1
+flask_sqlalchemy==3.1.1
+flask_bcrypt==1.0.1
+python-dotenv==1.0.1
+redis==4.3.4
+Flask-Session==0.8.0
+Flask-Mail==0.10.0
+Flask-RESTful==0.3.10
+celery==5.5.3
+honcho==2.0.0
+fpdf2==2.8.3

@@ -1,0 +1,4 @@
+redis: redis-server
+beat: celery -A scheduler beat --loglevel=info
+worker: celery -A tasks worker --loglevel=info
+web: flask run --reload
